@@ -123,7 +123,7 @@ class ChbtcGateway(VtGateway):
     #----------------------------------------------------------------------
     def qryAccount(self):
         """查询账户资金"""
-        pass
+        self.tradeApi.queryAccount()
         
     #----------------------------------------------------------------------
     def qryPosition(self):
@@ -205,12 +205,14 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
 
         return pos
 
-    def _makeAccount(self, netAssets):
+    def _makeAccount(self, data):
         account = VtAccountData()
         account.gatewayName = self.gatewayName
-        account.accountID = 'CHBTC'
+
+        account.accountID = data['base']['username']
         account.vtAccountID = '.'.join([account.accountID, self.gatewayName])
-        account.balance = netAssets
+
+        account.balance = data['netAssets']
 
         self.gateway.onAccount(account)
 
@@ -221,7 +223,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
 
         result = data['result']
         # 推送账户数据
-        self._makeAccount(result['netAssets'])
+        self._makeAccount(result)
         # 推送持仓数据
         if self.market == 'cny':
             balance = result['balance']
@@ -471,7 +473,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
         if req.priceType != PRICETYPE_LIMITPRICE:
             err = VtErrorData()
             err.gatewayName = self.gatewayName
-            err.errorMsg = u'火币接口仅支持限价单'
+            err.errorMsg = u'CHBTC接口仅支持限价单'
             err.errorTime = datetime.now().strftime('%H:%M:%S')
             self.gateway.onError(err)
             return None
@@ -542,15 +544,7 @@ class ChbtcDataApi(vnchbtc.DataApi):
 
     
     #----------------------------------------------------------------------
-    def onTick(self, data):
-        """实时成交推送"""
-        print data
-
-    def _makeTick(self):
-        tick = VtTickData()
-
-    #----------------------------------------------------------------------
-    def onQuote(self, symbol, data):
+    def onTick(self, symbol, data):
         """实时报价推送"""
         ticker = data['ticker']
 
@@ -569,7 +563,13 @@ class ChbtcDataApi(vnchbtc.DataApi):
         tick.lowPrice = ticker['low']
         tick.lastPrice = ticker['last']
         tick.volume = ticker['vol']
-    
+
+        dtm = datetime.fromtimestamp(int(data['date'])/1000.0)
+        tick.date = dtm.strftime('%Y%m%d')
+        tick.time = dtm.strftime('%H:%M:%S')
+
+        self.gateway.onTick(tick)
+
     #----------------------------------------------------------------------
     def onDepth(self, symbol, data):
         """实时深度推送"""
@@ -591,6 +591,7 @@ class ChbtcDataApi(vnchbtc.DataApi):
         tick.bidPrice4, tick.bidVolume4 = data['bids'][3]
         tick.bidPrice5, tick.bidVolume5 = data['bids'][4]
 
+        data['asks'].reverse()  # 返回的降序，卖价应以升序展示
         tick.askPrice1, tick.askVolume1 = data['asks'][0]
         tick.askPrice2, tick.askVolume2 = data['asks'][1]
         tick.askPrice3, tick.askVolume3 = data['asks'][2]
@@ -625,8 +626,10 @@ class ChbtcDataApi(vnchbtc.DataApi):
 
         # 订阅行情并推送合约信息
         if self.market == vnchbtc.MARKETTYPE_CNY:
-            # self.subscribeQuote(vnchbtc.SYMBOL_BTCCNY)
-            # self.subscribeQuote(vnchbtc.SYMBOL_LTCCNY)
+            self.subscribeTick(vnchbtc.SYMBOL_BTCCNY)
+            self.subscribeTick(vnchbtc.SYMBOL_LTCCNY)
+            self.subscribeTick(vnchbtc.SYMBOL_ETCCNY)
+            self.subscribeTick(vnchbtc.SYMBOL_ETHCNY)
 
             self.subscribeDepth(vnchbtc.SYMBOL_BTCCNY)
             self.subscribeDepth(vnchbtc.SYMBOL_LTCCNY)

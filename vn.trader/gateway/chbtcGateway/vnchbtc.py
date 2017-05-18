@@ -506,8 +506,8 @@ class DataApi(object):
         SYMBOL_ETCCNY: 'http://api.chbtc.com/data/v1/ticker?currency=etc_cny',
         SYMBOL_ETHCNY: 'http://api.chbtc.com/data/v1/ticker?currency=eth_cny',
     }
-    
-    QUOTE_SYMBOL_URL = {
+
+    HISTORY_SYMBOL_URL = {
         SYMBOL_BTCCNY: 'http://api.chbtc.com/data/v1/trades?currency=btc_cny',
         SYMBOL_LTCCNY: 'http://api.chbtc.com/data/v1/trades?currency=ltc_cny',
         SYMBOL_ETCCNY: 'http://api.chbtc.com/data/v1/trades?currency=etc_cny',
@@ -577,33 +577,22 @@ class DataApi(object):
     def subscribeTick(self, symbol):
         """订阅实时成交数据"""
         url = self.TICK_SYMBOL_URL[symbol]
-        task = (url, self.onTick)
+        task = (url, partial(self.onTick, symbol))
         self.taskList.append(task)
         
     #----------------------------------------------------------------------
-    def subscribeQuote(self, symbol):
-        """订阅实时报价数据"""
-        url = self.QUOTE_SYMBOL_URL[symbol]
-        task = (url, partial(self.onQuote, symbol))
-        self.taskList.append(task)
-        
-    #----------------------------------------------------------------------
-    def subscribeDepth(self, symbol):
+    def subscribeDepth(self, symbol, merge=0.1):
         """订阅深度数据"""
         url = self.DEPTH_SYMBOL_URL[symbol]
-        
+        url += '&merge=%s' % (merge,)
+
         task = (url, partial(self.onDepth, symbol))
         self.taskList.append(task)        
         
     #----------------------------------------------------------------------
-    def onTick(self, data):
+    def onTick(self, symbol, data):
         """实时成交推送"""
         print data
-        
-    #----------------------------------------------------------------------
-    def onQuote(self, symbol, data):
-        """实时报价推送"""
-        print data    
     
     #----------------------------------------------------------------------
     def onDepth(self, symbol, data):
