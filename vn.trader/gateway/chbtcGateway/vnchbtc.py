@@ -11,6 +11,7 @@ import requests
 from time import time, sleep
 from Queue import Queue, Empty
 from threading import Thread
+import threadpool
 
 
 # 常量定义
@@ -529,6 +530,7 @@ class DataApi(object):
     }        
     
     DEBUG = True
+    POOL_SIZE = 10
 
     #----------------------------------------------------------------------
     def __init__(self):
@@ -557,22 +559,36 @@ class DataApi(object):
             self.taskThread.join()
         
     #----------------------------------------------------------------------
+    def _excutor(self, url, callback):
+        try:
+            r = requests.get(url)
+            if r.status_code == 200:
+                data = r.json()
+                if self.DEBUG:
+                    print callback.__name__
+                callback(data)
+        except Exception, e:
+            print e
+
     def run(self):
         """连续运行"""
+        p = threadpool.ThreadPool(self.POOL_SIZE)
         while self.active:
             for url, callback in self.taskList:
-                try:
-                    r = requests.get(url)
-                    if r.status_code == 200:
-                        data = r.json()
-                        if self.DEBUG:
-                            print callback.__name__
-                        callback(data)
-                except Exception, e:
-                    print e
-                    
-            sleep(self.taskInterval)
-            
+                req = threadpool.WorkRequest(
+                    self._excutor,
+                    (url, callback)
+                )
+                p.putRequest(req)
+
+            st = time()
+            p.wait()
+            elapse = time() - st
+
+            need_sleep = max(self.taskInterval-elapse, 0)
+            print '####', elapse, need_sleep
+            sleep(need_sleep)
+
     #----------------------------------------------------------------------
     def subscribeTick(self, symbol):
         """订阅实时成交数据"""
