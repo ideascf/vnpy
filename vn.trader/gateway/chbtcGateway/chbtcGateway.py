@@ -186,7 +186,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
         """错误推送"""
         err = VtErrorData()
         err.gatewayName = self.gatewayName
-        err.errorMsg = str(error)
+        err.errorMsg = error
         err.errorTime = datetime.now().strftime('%H:%M:%S')
         self.gateway.onError(err)
 
@@ -209,7 +209,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
         account = VtAccountData()
         account.gatewayName = self.gatewayName
 
-        account.accountID = data['base']['username']
+        account.accountID = str(data['base']['username'])
         account.vtAccountID = '.'.join([account.accountID, self.gatewayName])
 
         account.balance = data['netAssets']
@@ -376,7 +376,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
     #----------------------------------------------------------------------
     def onCancelOrder(self, data, req, reqID):
         """撤单回调"""
-        if data['result'] == '1000':
+        if data['code'] == '1000':
             systemID = req['params']['id']
             localID = self.systemLocalDict[systemID]
 
