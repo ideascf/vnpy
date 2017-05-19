@@ -196,7 +196,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
         pos.gatewayName = self.gatewayName
         pos.symbol = symbol
         pos.exchange = EXCHANGE_CHBTC
-        pos.vtSymbol = pos.symbol
+        pos.vtSymbol = '.'.join([pos.symbol, pos.exchange])
         pos.vtPositionName = pos.vtSymbol
         pos.position = available_amount
         pos.frozen = frozen_amount
@@ -245,7 +245,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
         # 合约代码
         order.symbol = SYMBOL_MAP[d['currency']]
         order.exchange = EXCHANGE_CHBTC
-        order.vtSymbol = order.symbol
+        order.vtSymbol = '.'.join([order.symbol, order.exchange])
 
         # 委托号
         systemID = d['id']
@@ -496,7 +496,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
 
         order.symbol = req.symbol
         order.exchange = EXCHANGE_CHBTC
-        order.vtSymbol = order.symbol
+        order.vtSymbol = '.'.join([order.symbol, order.exchange])
 
         order.orderID = localID
         order.vtOrderID = '.'.join([order.orderID, order.gatewayName])
@@ -554,7 +554,7 @@ class ChbtcDataApi(vnchbtc.DataApi):
 
             tick.symbol = symbol
             tick.exchange = EXCHANGE_CHBTC
-            tick.vtSymbol = tick.symbol
+            tick.vtSymbol = '.'.join([tick.symbol, tick.exchange])
             self.tickDict[symbol] = tick
         else:
             tick = self.tickDict[symbol]
@@ -580,7 +580,7 @@ class ChbtcDataApi(vnchbtc.DataApi):
 
             tick.symbol = symbol
             tick.exchange = EXCHANGE_CHBTC
-            tick.vtSymbol = tick.symbol
+            tick.vtSymbol = '.'.join([tick.symbol, tick.exchange])
             self.tickDict[symbol] = tick
         else:
             tick = self.tickDict[symbol]
@@ -610,7 +610,7 @@ class ChbtcDataApi(vnchbtc.DataApi):
         contract.gatewayName = self.gatewayName
         contract.symbol = symbol
         contract.exchange = EXCHANGE_CHBTC
-        contract.vtSymbol = contract.symbol
+        contract.vtSymbol = '.'.join([contract.symbol, contract.exchange])
         contract.name = name
         contract.size = size
         contract.priceTick = priceTick
