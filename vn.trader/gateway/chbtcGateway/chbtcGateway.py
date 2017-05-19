@@ -566,7 +566,7 @@ class ChbtcDataApi(vnchbtc.DataApi):
 
         dtm = datetime.fromtimestamp(int(data['date'])/1000.0)
         tick.date = dtm.strftime('%Y%m%d')
-        tick.time = dtm.strftime('%H:%M:%S')
+        tick.time = dtm.strftime('%H:%M:%S.%f')
 
         self.gateway.onTick(tick)
 
@@ -599,7 +599,7 @@ class ChbtcDataApi(vnchbtc.DataApi):
         tick.askPrice5, tick.askVolume5 = data['asks'][4]
 
         now = datetime.now()
-        tick.time = now.strftime('%H:%M:%S')
+        tick.time = now.strftime('%H:%M:%S.%f')
         tick.date = now.strftime('%Y%m%d')
 
         self.gateway.onTick(tick)
