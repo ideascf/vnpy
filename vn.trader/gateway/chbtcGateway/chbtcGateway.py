@@ -53,6 +53,7 @@ class ChbtcGateway(VtGateway):
         
         self.tradeApi = ChbtcTradeApi(self)
         self.dataApi = ChbtcDataApi(self)
+        self.qryFunctionList = []
         
     #----------------------------------------------------------------------
     def connect(self):
@@ -568,6 +569,7 @@ class ChbtcDataApi(vnchbtc.DataApi):
         tick.date = dtm.strftime('%Y%m%d')
         tick.time = dtm.strftime('%H:%M:%S.%f')
 
+        tick = copy(tick)
         self.gateway.onTick(tick)
 
     #----------------------------------------------------------------------
@@ -598,11 +600,12 @@ class ChbtcDataApi(vnchbtc.DataApi):
         tick.askPrice4, tick.askVolume4 = data['asks'][3]
         tick.askPrice5, tick.askVolume5 = data['asks'][4]
 
-        now = datetime.now()
-        tick.time = now.strftime('%H:%M:%S.%f')
-        tick.date = now.strftime('%Y%m%d')
+        # now = datetime.now()
+        # tick.time = now.strftime('%H:%M:%S.%f')
+        # tick.date = now.strftime('%Y%m%d')
 
-        self.gateway.onTick(tick)
+        # @IMPORTANT 由onTick一起发出
+        # self.gateway.onTick(tick)
         
     #----------------------------------------------------------------------
     def _makeContract(self, symbol, name, size=1, priceTick=0.01, productClass=PRODUCT_SPOT):
