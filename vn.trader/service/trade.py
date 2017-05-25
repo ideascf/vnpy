@@ -1,5 +1,9 @@
 # encoding: utf-8
 from __future__ import print_function
+import os
+import sys
+CUR_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.append(os.path.dirname(CUR_DIR))
 
 from datetime import datetime
 import signal
