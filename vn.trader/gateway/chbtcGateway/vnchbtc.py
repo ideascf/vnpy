@@ -687,7 +687,7 @@ class DataApiWS(object):
         resp = json.loads(event)
         channel = resp['channel']
         callback = self.cbDict[channel]
-        callback(event)
+        callback(resp)
 
         print 'onMessage, channel: ', channel
 
