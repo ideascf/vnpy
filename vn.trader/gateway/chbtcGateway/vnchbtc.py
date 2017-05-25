@@ -651,7 +651,6 @@ class DataApiWS(object):
 
     def __init__(self):
         self.active = False
-
         self.taskInterval = 0  # 每轮请求延时
         self.thread = None
         self.ws = None
@@ -702,6 +701,14 @@ class DataApiWS(object):
 
     def init(self, interval, debug):
         websocket.enableTrace(debug)
+        self.active = True
+
+    def exit(self):
+        """退出"""
+        self.active = False
+
+        if self.thread.isAlive():
+            self.thread.join()
 
     def initCallback(self):
         self.cbDict['btc_cny_ticker'] = self.onTick
