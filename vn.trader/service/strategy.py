@@ -38,7 +38,7 @@ class Strategy(object):
         self.cli = VtClient(self.tradeAddr, self.marketingAddr, self.eventEngine)
         self.cliEngine = ClientEngine(self.cli, self.eventEngine)
 
-        self.isRunnig = False
+        self.isRunning = False
 
 
     def start(self):
@@ -46,16 +46,41 @@ class Strategy(object):
         self.cli.subscribeTopic('')
         self.cli.start()
 
-        self.isRunnig = True
-        while self.isRunnig:
-            printLog(u'请输入Ctrl-C来关闭服务器')
-            sleep(1)
+
+        self.cliEngine.ctaEngine.loadStrategy({
+            'name': 'KLineStrategy',
+            'className': 'KLineStrategy',
+            'vtSymbol': 'ETHCNY.CHBTC',
+        })
+
+
+        self.onStart()
+
+        self.isRunning = True
+        self.onRunging()
 
         self.stop()
 
     def stop(self):
-        self.cli.stop()
-        self.eventEngine.stop()
+        self.cliEngine.exit()
+
+
+    def onStart(self):
+        def handler(event):
+            # print(event.type_, event.dict_)
+            pass
+
+        self.eventEngine.registerGeneralHandler(handler)
+
+    def onRunging(self):
+        cnt = 0
+        while self.isRunning:
+            if cnt >= 10:
+                cnt = 0
+                printLog(u'请输入Ctrl-C来关闭服务器')
+
+            cnt += 1
+            sleep(1)
 
 
 g_strategy = None

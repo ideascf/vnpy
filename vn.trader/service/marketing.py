@@ -51,12 +51,21 @@ class Marketing(object):
         printLog('-' * 50)
         printLog(u'marketing服务器已启动')
         # 进入主循环
-        while self.isRunning:
-            printLog(u'请输入Ctrl-C来关闭服务器')
-            sleep(1)
+        self.isRunning = True
+        self.onRunging()
 
         server.stopServer()
         self.mainEngine.exit()
+
+    def onRunging(self):
+        cnt = 0
+        while self.isRunning:
+            if cnt >= 10:
+                cnt = 0
+                printLog(u'请输入Ctrl-C来关闭服务器')
+
+            cnt += 1
+            sleep(1)
 
     def _connectGateway(self, gatewayList):
         for gateway in gatewayList:

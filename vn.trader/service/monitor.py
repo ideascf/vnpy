@@ -31,7 +31,7 @@ class Monitor(object):
         self.isRunning = False
 
     def start(self):
-        self.eventEngine.start()
+        self.eventEngine.start(timer=False)
 
         if self.marketingAddr:
             self.marketingCli = VtClient('tcp://localhost:0', self.marketingAddr, self.eventEngine)
@@ -79,7 +79,7 @@ def runServer():
     signal.signal(signal.SIGINT, signal_handler)
 
     def handler(event):
-        print(event.__dict__)
+        print(event.type_, event.dict_)
 
     eventEngine = EventEngine2()
     eventEngine.registerGeneralHandler(handler)

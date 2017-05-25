@@ -26,7 +26,7 @@ class Trade(object):
         self.mainEngine = None
         self.isRunning = False
 
-    def start(self, gatewayList):
+    def start(self, gatewayList, mainEngine):
         """
         
         :param gatewayList: such as ['CHBTC', 'HUOBI'] 
@@ -40,7 +40,7 @@ class Trade(object):
         self.isRunning = True
 
         # 创建主引擎对象
-        self.mainEngine = MainEngine(enableCtaEngine=False, enableDrEngine=True, enableRmEngine=False)
+        self.mainEngine = mainEngine
 
         # 启动server
         server = VtServer(self.reqAddr, self.pubAddr, self.mainEngine)
@@ -49,21 +49,33 @@ class Trade(object):
 
 
         printLog('-' * 50)
-        printLog(u'marketing服务器已启动')
+        printLog(u'trade服务器已启动')
         # 进入主循环
-        while self.isRunning:
-            printLog(u'请输入Ctrl-C来关闭服务器')
-            sleep(1)
+        self.isRunning = True
+        self.onRunning()
 
         server.stopServer()
+        self.mainEngine.exit()
 
     def _connectGateway(self, gatewayList):
         for gateway in gatewayList:
-            # Marketing不需要对账户信息和交易信息进行查询
-            self.mainEngine.gatewayDict[gateway].setQryEnabled(False)
             self.mainEngine.connect(gateway)
+            gw = self.mainEngine.gatewayDict[gateway]
+            if hasattr(gw, 'dataApi'):
+                gw.dataApi.exit()
 
             printLog('Gateway(%s) connect finished.' % (gateway,))
+
+
+    def onRunning(self):
+        cnt = 0
+        while self.isRunning:
+            if cnt >= 10:
+                cnt = 0
+                printLog(u'请输入Ctrl-C来关闭服务器')
+
+            cnt += 1
+            sleep(1)
 
 g_trade = None
 def signal_handler(signum, frame):
@@ -78,13 +90,14 @@ def runServer():
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
 
+    mainEngine = MainEngine(enableCtaEngine=False, enableDrEngine=True, enableRmEngine=False)
     g_trade = Trade(
         config.TRADE_REQ_ADDR,
         config.TRADE_PUB_ADDR,
     )
     g_trade.start([
         vtConstant.EXCHANGE_CHBTC,
-    ])
+    ], mainEngine)
 
 
 if __name__ == '__main__':
