@@ -272,7 +272,7 @@ class TradeApi(object):
     def orderInfo(self, id_, currency=CURRENCY_BTCCNY):
         """获取委托详情"""
         method = FUNCTIONCODE_ORDERINFO
-        callback = self.onGetOrderIdByTradeId
+        callback = self.onOrderInfo
 
         params = OrderedDict()
         params['method'] = method

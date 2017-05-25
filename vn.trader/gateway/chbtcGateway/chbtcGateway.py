@@ -639,9 +639,9 @@ class ChbtcDataApi(vnchbtc.DataApi):
             self.subscribeDepth(vnchbtc.SYMBOL_ETCCNY)
             self.subscribeDepth(vnchbtc.SYMBOL_ETHCNY)
 
-            self._makeContract(SYMBOL_BTCCNY, u'人民币现货BTC', 1, 0.01, PRODUCT_SPOT)
-            self._makeContract(SYMBOL_LTCCNY, u'人民币现货LTC', 1, 0.01, PRODUCT_SPOT)
-            self._makeContract(SYMBOL_ETCCNY, u'人民币现货ETC', 1, 0.01, PRODUCT_SPOT)
-            self._makeContract(SYMBOL_ETHCNY, u'人民币现货ETH', 1, 0.01, PRODUCT_SPOT)
+            # self._makeContract(SYMBOL_BTCCNY, u'人民币现货BTC', 1, 0.01, PRODUCT_SPOT)
+            # self._makeContract(SYMBOL_LTCCNY, u'人民币现货LTC', 1, 0.01, PRODUCT_SPOT)
+            # self._makeContract(SYMBOL_ETCCNY, u'人民币现货ETC', 1, 0.01, PRODUCT_SPOT)
+            # self._makeContract(SYMBOL_ETHCNY, u'人民币现货ETH', 1, 0.01, PRODUCT_SPOT)
         else:
             pass
