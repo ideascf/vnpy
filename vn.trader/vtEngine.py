@@ -23,7 +23,7 @@ class MainEngine(object):
     """主引擎"""
 
     #----------------------------------------------------------------------
-    def __init__(self):
+    def __init__(self, enableCtaEngine=True, enableDrEngine=True, enableRmEngine=True):
         """Constructor"""
         # 记录今日日期
         self.todayDate = datetime.now().strftime('%Y%m%d')
@@ -42,9 +42,20 @@ class MainEngine(object):
         self.initGateway()
 
         # 扩展模块
-        self.ctaEngine = CtaEngine(self, self.eventEngine)
-        self.drEngine = DrEngine(self, self.eventEngine)
-        self.rmEngine = RmEngine(self, self.eventEngine)
+        if enableCtaEngine:
+            self.ctaEngine = CtaEngine(self, self.eventEngine)
+        else:
+            self.ctaEngine = None
+
+        if enableDrEngine:
+            self.drEngine = DrEngine(self, self.eventEngine)
+        else:
+            self.drEngine = None
+
+        if enableRmEngine:
+            self.rmEngine = RmEngine(self, self.eventEngine)
+        else:
+            self.rmEngine = None
         
     #----------------------------------------------------------------------
     def initGateway(self):
@@ -58,7 +69,7 @@ class MainEngine(object):
                 self.addGateway(gatewayModule.gateway, gatewayModule.gatewayName)
                 if gatewayModule.gatewayQryEnabled:
                     self.gatewayDict[gatewayModule.gatewayName].setQryEnabled(True)
-            except Exception, e:
+            except Exception as e:
                 print e
 
     #----------------------------------------------------------------------
@@ -91,7 +102,7 @@ class MainEngine(object):
     def sendOrder(self, orderReq, gatewayName):
         """对特定接口发单"""
         # 如果风控检查失败则不发单
-        if not self.rmEngine.checkRisk(orderReq):
+        if self.rmEngine and  not self.rmEngine.checkRisk(orderReq):
             return ''
 
         if gatewayName in self.gatewayDict:
@@ -139,7 +150,8 @@ class MainEngine(object):
         self.eventEngine.stop()      
         
         # 停止数据记录引擎
-        self.drEngine.stop()
+        if self.drEngine is not None:
+            self.drEngine.stop()
         
         # 保存数据引擎里的合约数据到硬盘
         self.dataEngine.saveContracts()
