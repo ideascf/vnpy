@@ -712,15 +712,15 @@ class DataApiWS(object):
             self.thread.join()
 
     def initCallback(self):
-        self.cbDict['btc_cny_ticker'] = self.onTick
-        self.cbDict['ltc_cny_ticker'] = self.onTick
-        self.cbDict['etc_cny_ticker'] = self.onTick
-        self.cbDict['eth_cny_ticker'] = self.onTick
+        self.cbDict['btc_cny_ticker'] = partial(self.onTick, SYMBOL_BTCCNY)
+        self.cbDict['ltc_cny_ticker'] = partial(self.onTick, SYMBOL_LTCCNY)
+        self.cbDict['etc_cny_ticker'] = partial(self.onTick, SYMBOL_ETCCNY)
+        self.cbDict['eth_cny_ticker'] = partial(self.onTick, SYMBOL_ETHCNY)
 
-        self.cbDict['btc_cny_depth'] = self.onDepth
-        self.cbDict['ltc_cny_depth'] = self.onDepth
-        self.cbDict['etc_cny_depth'] = self.onDepth
-        self.cbDict['eth_cny_depth'] = self.onDepth
+        self.cbDict['btc_cny_depth'] = partial(self.onDepth, SYMBOL_BTCCNY)
+        self.cbDict['ltc_cny_depth'] = partial(self.onDepth, SYMBOL_LTCCNY)
+        self.cbDict['etc_cny_depth'] = partial(self.onDepth, SYMBOL_ETCCNY)
+        self.cbDict['eth_cny_depth'] = partial(self.onDepth, SYMBOL_ETHCNY)
 
     def subscribeTick(self, symbol):
         """订阅实时成交数据"""
