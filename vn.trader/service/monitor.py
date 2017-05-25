@@ -31,6 +31,8 @@ class Monitor(object):
         self.isRunning = False
 
     def start(self):
+        self.eventEngine.start()
+
         if self.marketingAddr:
             self.marketingCli = VtClient('tcp://localhost:0', self.marketingAddr, self.eventEngine)
             self.marketingCli.subscribeTopic('')
@@ -51,6 +53,8 @@ class Monitor(object):
             printLog(u'请输入Ctrl-C来关闭服务器')
             sleep(1)
 
+        self.stop()
+
     def stop(self):
         if self.marketingCli:
             self.marketingCli.stop()
@@ -59,9 +63,11 @@ class Monitor(object):
         if self.tradeCli:
             self.tradeCli.stop()
 
+        self.eventEngine.stop()
+
 g_monitor = None
 def signal_handler(signum, frame):
-    if signum in (signal.SIGINT, signal.SIGTERM):
+    if signum in (signal.SIGINT, signal.SIGTERM, signal.SIGKILL):
         if g_monitor is not None:
             g_monitor.isRunning = False
 
@@ -72,11 +78,17 @@ def runServer():
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
 
+    def handler(event):
+        print(event.__dict__)
+
+    eventEngine = EventEngine2()
+    eventEngine.registerGeneralHandler(handler)
+
     g_monitor = Monitor(
         config.MARKETING_PUB_ADDR,
         config.STRATEGY_PUB_ADDR,
         config.TRADE_PUB_ADDR,
-        EventEngine(),
+        eventEngine,
     )
     g_monitor.start()
 

@@ -34,7 +34,7 @@ class Strategy(object):
         self.marketingAddr = marketingAddr
         self.tradeAddr = tradeAddr
 
-        self.eventEngine = EventEngine()
+        self.eventEngine = EventEngine2()
         self.cli = VtClient(self.tradeAddr, self.marketingAddr, self.eventEngine)
         self.cliEngine = ClientEngine(self.cli, self.eventEngine)
 
@@ -50,6 +50,8 @@ class Strategy(object):
         while self.isRunnig:
             printLog(u'请输入Ctrl-C来关闭服务器')
             sleep(1)
+
+        self.stop()
 
     def stop(self):
         self.cli.stop()

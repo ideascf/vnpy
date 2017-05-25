@@ -56,6 +56,7 @@ class Marketing(object):
             sleep(1)
 
         server.stopServer()
+        self.mainEngine.exit()
 
     def _connectGateway(self, gatewayList):
         for gateway in gatewayList:

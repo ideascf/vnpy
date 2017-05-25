@@ -684,11 +684,11 @@ class DataApiWS(object):
 
     def onMessage(self, ws, event):
         resp = json.loads(event)
-        print resp
-
         channel = resp['channel']
         callback = self.cbDict[channel]
         callback(event)
+
+        print 'onMessage, channel: ', channel
 
     def onError(self, ws, event):
         pass
