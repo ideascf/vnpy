@@ -18,13 +18,12 @@ class VtServer(RpcServer):
     """vn.trader服务器"""
 
     #----------------------------------------------------------------------
-    def __init__(self, repAddress, pubAddress):
+    def __init__(self, repAddress, pubAddress, engine):
         """Constructor"""
         super(VtServer, self).__init__(repAddress, pubAddress)
         self.usePickle()
-        
-        # 创建主引擎对象
-        self.engine = MainEngine()
+
+        self.engine = engine
         
         # 注册主引擎的方法到服务器的RPC函数
         self.register(self.engine.connect)
@@ -73,10 +72,10 @@ def printLog(content):
 def runServer():
     """运行服务器"""
     repAddress = 'tcp://*:2014'
-    pubAddress = 'tcp://*:0602'
+    pubAddress = 'tcp://*:2015'
     
     # 创建并启动服务器
-    server = VtServer(repAddress, pubAddress)
+    server = VtServer(repAddress, pubAddress, MainEngine())
     server.start()
     
     printLog('-'*50)
