@@ -14,6 +14,10 @@ GATEWAY_DICT = {}
 # 获取目录路径
 path = os.path.abspath(os.path.dirname(__file__))
 
+ENABLED_GATEWAY = tuple([
+    'huobiGateway', 'chbtcGateway', 'okcoinGateway',
+])
+
 # 遍历strategy目录下的文件
 for root, subdirs, files in os.walk(path):
     if path != root:
@@ -21,7 +25,7 @@ for root, subdirs, files in os.walk(path):
     
     for foldername in subdirs:
         # 接口目录名中必须含有Gateway
-        if 'Gateway' in foldername:
+        if 'Gateway' in foldername and foldername in ENABLED_GATEWAY:
             # 模块名称需要上前缀
             moduleName = 'gateway.' + foldername
             
