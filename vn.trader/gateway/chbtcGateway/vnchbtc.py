@@ -651,6 +651,7 @@ class DataApiWS(object):
 
     def __init__(self):
         self.active = False
+        self.wsConnected = False
         self.taskInterval = 0  # 每轮请求延时
         self.thread = None
         self.ws = None
@@ -694,10 +695,10 @@ class DataApiWS(object):
         pass
 
     def onClose(self, ws):
-        pass
+        self.wsConnected = False
 
     def onOpen(self, ws):
-        pass
+        self.wsConnected = True
 
     def init(self, interval, debug):
         websocket.enableTrace(debug)

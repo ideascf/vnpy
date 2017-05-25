@@ -664,10 +664,10 @@ class ChbtcDataApi(vnchbtc.DataApiWS):
         self.writeLog(u'服务器连接断开')
         if self.active:
             def reconnect():
-                while not self.gateway.connected:
+                while not self.wsConnected:
                     self.writeLog(u'等待10秒后重新连接')
                     sleep(10)
-                    if not self.gateway.connected:
+                    if not self.wsConnected:
                         self._reconnect()
 
             t = Thread(target=reconnect)
