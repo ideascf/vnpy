@@ -1,5 +1,4 @@
 # encoding: utf-8
-
 import urllib
 import hashlib
 import hmac
@@ -12,6 +11,7 @@ from time import time, sleep
 from Queue import Queue, Empty
 from threading import Thread
 import threadpool
+import websocket
 
 
 # 常量定义
@@ -632,3 +632,116 @@ class DataApi(object):
         except Exception, e:
             print e
             return None
+
+
+class DataApiWS(object):
+    HOST = 'wss://api.chbtc.com:9999/websocket'
+    TICK_SYMBOL_CHANNEL = {
+        SYMBOL_BTCCNY: 'btc_cny_ticker',
+        SYMBOL_LTCCNY: 'ltc_cny_ticker',
+        SYMBOL_ETCCNY: 'etc_cny_ticker',
+        SYMBOL_ETHCNY: 'eth_cny_ticker',
+    }
+    DEPTH_SYMBOL_CHANNEL = {
+        SYMBOL_BTCCNY: 'btc_cny_depth',
+        SYMBOL_LTCCNY: 'ltc_cny_depth',
+        SYMBOL_ETCCNY: 'etc_cny_depth',
+        SYMBOL_ETHCNY: 'eth_cny_depth',
+    }
+
+    def __init__(self):
+        self.active = False
+
+        self.taskInterval = 0  # 每轮请求延时
+        self.thread = None
+        self.ws = None
+        self.cbDict = {}
+
+        self.initCallback()
+
+    def _connect(self):
+        self.ws = websocket.WebSocketApp(
+            self.HOST,
+            on_message=self.onMessage,
+            on_error=self.onError,
+            on_close=self.onClose,
+            on_open=self.onOpen,
+        )
+        self.thread = Thread(target=self.ws.run_forever)
+        self.thread.start()
+
+    def _reconnect(self):
+        """重新连接"""
+        # 首先关闭之前的连接
+        self._close()
+        # 再执行重连任务
+        self._connect()
+
+    def _close(self):
+        """关闭接口"""
+        if self.thread and self.thread.isAlive():
+            self.ws.close()
+            self.thread.join()
+
+    def onMessage(self, ws, event):
+        resp = json.loads(event)
+        print resp
+
+        channel = resp['channel']
+        callback = self.cbDict[channel]
+        callback(event)
+
+    def onError(self, ws, event):
+        pass
+
+    def onClose(self, ws):
+        pass
+
+    def onOpen(self, ws):
+        pass
+
+    def init(self, interval, debug):
+        websocket.enableTrace(debug)
+
+    def initCallback(self):
+        self.cbDict['btc_cny_ticker'] = self.onTick
+        self.cbDict['ltc_cny_ticker'] = self.onTick
+        self.cbDict['etc_cny_ticker'] = self.onTick
+        self.cbDict['eth_cny_ticker'] = self.onTick
+
+        self.cbDict['btc_cny_depth'] = self.onDepth
+        self.cbDict['ltc_cny_depth'] = self.onDepth
+        self.cbDict['etc_cny_depth'] = self.onDepth
+        self.cbDict['eth_cny_depth'] = self.onDepth
+
+    def subscribeTick(self, symbol):
+        """订阅实时成交数据"""
+        channel = self.TICK_SYMBOL_CHANNEL[symbol]
+        req = {
+            'event': 'addChannel',
+            'channel': channel,
+        }
+        self._send(req)
+
+    def subscribeDepth(self, symbol, merge=0.1):
+        """订阅深度数据"""
+        channel = self.DEPTH_SYMBOL_CHANNEL[symbol]
+        req = {
+            'event': 'addChannel',
+            'channel': channel,
+        }
+        self._send(req)
+
+    def onTick(self, symbol, data):
+        print symbol, data
+
+    def onDepth(self, symbol, data):
+        print symbol, data
+
+    def _send(self, data):
+        try:
+            self.ws.send(json.dumps(data))
+        except websocket.WebSocketConnectionClosedException as e:
+            print e
+            pass
+

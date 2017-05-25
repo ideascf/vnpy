@@ -528,7 +528,7 @@ class ChbtcTradeApi(vnchbtc.TradeApi):
 
 
 ########################################################################
-class ChbtcDataApi(vnchbtc.DataApi):
+class ChbtcDataApi(vnchbtc.DataApiWS):
     """行情接口"""
 
     #----------------------------------------------------------------------
@@ -626,6 +626,18 @@ class ChbtcDataApi(vnchbtc.DataApi):
         self.market = market
 
         self.init(interval, debug)
+        self._connect()
+
+    def onError(self, ws, event):
+        super(ChbtcDataApi, self).onError(ws, event)
+
+        error = VtErrorData()
+        error.gatewayName = self.gatewayName
+        error.errorMsg = str(event)
+        self.gateway.onError(error)
+
+    def onOpen(self, ws):
+        super(ChbtcDataApi, self).onOpen(ws)
 
         # 订阅行情并推送合约信息
         if self.market == vnchbtc.MARKETTYPE_CNY:
@@ -645,3 +657,25 @@ class ChbtcDataApi(vnchbtc.DataApi):
             # self._makeContract(SYMBOL_ETHCNY, u'人民币现货ETH', 1, 0.01, PRODUCT_SPOT)
         else:
             pass
+
+    def onClose(self, ws):
+        super(ChbtcDataApi, self).onClose(ws)
+
+        self.writeLog(u'服务器连接断开')
+        if self.active:
+            def reconnect():
+                while not self.gateway.connected:
+                    self.writeLog(u'等待10秒后重新连接')
+                    sleep(10)
+                    if not self.gateway.connected:
+                        self._reconnect()
+
+            t = Thread(target=reconnect)
+            t.start()
+
+    def writeLog(self, content):
+        """快速记录日志"""
+        log = VtLogData()
+        log.gatewayName = self.gatewayName
+        log.logContent = content
+        self.gateway.onLog(log)
