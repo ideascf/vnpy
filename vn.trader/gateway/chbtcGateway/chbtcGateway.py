@@ -90,7 +90,7 @@ class ChbtcGateway(VtGateway):
         # 初始化接口
         self.tradeApi.connect(accessKey, secretKey, market, debug)
         self.writeLog(u'交易接口初始化成功')
-        
+
         self.dataApi.connect(interval, market, debug)
         self.writeLog(u'行情接口初始化成功')
         
@@ -560,10 +560,10 @@ class ChbtcDataApi(vnchbtc.DataApiWS):
         else:
             tick = self.tickDict[symbol]
 
-        tick.highPrice = ticker['high']
-        tick.lowPrice = ticker['low']
-        tick.lastPrice = ticker['last']
-        tick.volume = ticker['vol']
+        tick.highPrice = float(ticker['high'])
+        tick.lowPrice = float(ticker['low'])
+        tick.lastPrice = float(ticker['last'])
+        tick.volume = float(ticker['vol'])
 
         dtm = datetime.fromtimestamp(int(data['date'])/1000.0)
         tick.date = dtm.strftime('%Y%m%d')
